@@ -52,6 +52,13 @@ jobs:
           yarn ng build --configuration production --base-href "/${REPO_NAME}/"
           cp dist/sirma/index.html dist/sirma/404.html
 
+      - name: Validate build has no placeholder secrets
+        run: |
+          if grep -R "REPLACE_FIREBASE\|REPLACE_CLOUDINARY" dist/sirma; then
+            echo "Error: se detectaron placeholders en el build final."
+            exit 1
+          fi
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
 
