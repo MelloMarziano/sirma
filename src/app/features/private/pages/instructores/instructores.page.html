@@ -80,6 +80,15 @@
         </label>
 
         <label class="filter-box">
+          <span>Foto</span>
+          <select [(ngModel)]="selectedPhotoFilter" aria-label="Filtrar por foto">
+            <option value="ALL">Todas</option>
+            <option value="WITH_PHOTO">Con foto</option>
+            <option value="NO_PHOTO">Sin foto</option>
+          </select>
+        </label>
+
+        <label class="filter-box">
           <span>Ordenar por</span>
           <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar instructores">
             <option value="RANK">Rango</option>

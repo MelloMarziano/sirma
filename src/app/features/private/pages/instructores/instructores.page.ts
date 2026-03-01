@@ -21,11 +21,14 @@ export class InstructoresPage implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly tempObjectUrls: string[] = [];
   private selectedPhotoFile: File | null = null;
+  private readonly defaultPhotoUrl =
+    'https://res.cloudinary.com/dktcgc5nw/image/upload/v1772278625/bbe302ed8d905165577c638e908cec76_frtgru.jpg';
 
   searchTerm = '';
   selectedZoneFilter = 'ALL';
   selectedRankFilter = 'ALL';
   selectedStatusFilter = 'ALL';
+  selectedPhotoFilter: 'ALL' | 'WITH_PHOTO' | 'NO_PHOTO' = 'ALL';
   selectedOrderBy: 'RANK' | 'ZONE' = 'RANK';
   showMobileFilters = false;
   isRegisterModalOpen = false;
@@ -154,7 +157,13 @@ export class InstructoresPage implements OnInit, OnDestroy {
         this.selectedStatusFilter === 'ALL' ||
         (instructor.status ?? '') === this.selectedStatusFilter;
 
-      return matchesTerm && matchesZone && matchesRank && matchesStatus;
+      const hasCustomPhoto = this.hasCustomPhoto(instructor.photoUrl);
+      const matchesPhoto =
+        this.selectedPhotoFilter === 'ALL' ||
+        (this.selectedPhotoFilter === 'WITH_PHOTO' && hasCustomPhoto) ||
+        (this.selectedPhotoFilter === 'NO_PHOTO' && !hasCustomPhoto);
+
+      return matchesTerm && matchesZone && matchesRank && matchesStatus && matchesPhoto;
     });
 
     return this.sortInstructorList(filtered);
@@ -505,6 +514,7 @@ export class InstructoresPage implements OnInit, OnDestroy {
     this.selectedZoneFilter = 'ALL';
     this.selectedRankFilter = 'ALL';
     this.selectedStatusFilter = 'ALL';
+    this.selectedPhotoFilter = 'ALL';
     this.selectedOrderBy = 'RANK';
   }
 
@@ -800,6 +810,11 @@ export class InstructoresPage implements OnInit, OnDestroy {
 
   private compareNames(a: string, b: string): number {
     return (a ?? '').localeCompare(b ?? '', 'es', { sensitivity: 'base' });
+  }
+
+  private hasCustomPhoto(photoUrl: string | null | undefined): boolean {
+    const cleanPhotoUrl = (photoUrl ?? '').trim();
+    return !!cleanPhotoUrl && cleanPhotoUrl !== this.defaultPhotoUrl;
   }
 
   private resetFormState(revokeUpload: boolean): void {

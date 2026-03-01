@@ -122,7 +122,7 @@ textarea {
 
 .instructors-filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
   gap: 0.55rem;
   margin-bottom: 0.45rem;
 }
