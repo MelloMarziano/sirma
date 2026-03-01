@@ -1,0 +1,229 @@
+<div class="private-shell">
+  <aside class="app-sidebar d-none d-lg-flex">
+    <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+  </aside>
+
+  <div
+    class="offcanvas offcanvas-start app-sidebar d-lg-none"
+    tabindex="-1"
+    id="mobileSidebar"
+    aria-labelledby="mobileSidebarLabel"
+  >
+    <div class="offcanvas-body p-0">
+      <ng-container *ngTemplateOutlet="sidebarContent"></ng-container>
+    </div>
+  </div>
+
+  <section class="shell-content">
+    <header class="app-navbar">
+      <div class="d-flex align-items-center gap-3">
+        <button
+          class="btn nav-trigger d-lg-none"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#mobileSidebar"
+          aria-controls="mobileSidebar"
+          aria-label="Abrir menu de navegacion"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+        <h1 class="page-title mb-0">{{ appBarTitle }}</h1>
+      </div>
+
+      <div class="dropdown">
+        <button
+          type="button"
+          class="profile-chip"
+          data-bs-toggle="dropdown"
+          data-bs-auto-close="outside"
+          aria-expanded="false"
+        >
+          <span class="profile-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="10" r="3"></circle>
+              <path d="M7 20.66V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.66"></path>
+            </svg>
+          </span>
+          <span class="profile-meta">
+            <strong>{{ userName }}</strong>
+            <small>{{ userRole }}</small>
+          </span>
+        </button>
+
+        <ul
+          class="dropdown-menu dropdown-menu-end mt-2 p-2 border-0 rounded-4 shadow-sm"
+          style="
+            width: min(260px, calc(100vw - 24px));
+            background-color: #f7f9fc;
+          "
+        >
+          <li>
+            <button
+              type="button"
+              class="dropdown-item d-flex align-items-center gap-2 rounded-3 py-2 px-3"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                style="
+                  width: 18px;
+                  height: 18px;
+                  stroke: currentColor;
+                  stroke-width: 2;
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                "
+              >
+                <circle cx="12" cy="8" r="3"></circle>
+                <path d="M6 19.4a6 6 0 0 1 12 0"></path>
+              </svg>
+              <span>Mi Perfil</span>
+            </button>
+          </li>
+
+          <li><hr class="dropdown-divider my-2" /></li>
+
+          <li>
+            <button
+              type="button"
+              class="dropdown-item d-flex align-items-center gap-2 rounded-3 py-2 px-3 text-danger"
+              (click)="onSignOut()"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+                style="
+                  width: 18px;
+                  height: 18px;
+                  stroke: currentColor;
+                  stroke-width: 2;
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                "
+              >
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+              </svg>
+              <span>Cerrar Sesión</span>
+            </button>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </section>
+</div>
+
+<ng-template #sidebarContent>
+  <h2 id="mobileSidebarLabel" class="visually-hidden">Menu principal</h2>
+
+  <section class="sidebar-head">
+    <img
+      class="brand-banner"
+      src="assets/banner-end.png"
+      alt="SIRMA - Registro de Marcha"
+    />
+  </section>
+
+  <nav class="sidebar-nav">
+    <a
+      *ngFor="let item of navItems"
+      class="menu-link"
+      [routerLink]="item.route"
+      routerLinkActive="is-active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      data-bs-dismiss="offcanvas"
+    >
+      <span class="menu-icon">
+        <ng-container [ngSwitch]="item.icon">
+          <svg
+            *ngSwitchCase="'layout-dashboard'"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <rect x="3" y="3" width="8" height="8" rx="2"></rect>
+            <rect x="13" y="3" width="8" height="5" rx="2"></rect>
+            <rect x="13" y="10" width="8" height="11" rx="2"></rect>
+            <rect x="3" y="13" width="8" height="8" rx="2"></rect>
+          </svg>
+
+          <svg
+            *ngSwitchCase="'shield'"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M20 13c0 5-3.5 7.5-8 9c-4.5-1.5-8-4-8-9V6l8-3l8 3z"></path>
+          </svg>
+
+          <svg
+            *ngSwitchCase="'users'"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+
+          <svg
+            *ngSwitchCase="'graduation-cap'"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="m22 10-10-5-10 5 10 5z"></path>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+            <path d="M22 10v6"></path>
+          </svg>
+
+          <svg *ngSwitchCase="'user-cog'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="10" cy="8" r="3"></circle>
+            <path d="M4.2 19.5a6.2 6.2 0 0 1 11.6 0"></path>
+            <circle cx="18" cy="16" r="2.4"></circle>
+            <path d="M18 12.8v1"></path>
+            <path d="M18 18.2v1"></path>
+            <path d="m20.2 14.1-.85.5"></path>
+            <path d="m17.65 17.4-.86.5"></path>
+            <path d="m15.8 14.1.86.5"></path>
+            <path d="m18.35 17.4.85.5"></path>
+          </svg>
+
+          <svg *ngSwitchCase="'trophy'" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 4h8v3a4 4 0 0 1-8 0z"></path>
+            <path d="M6 5H4a2 2 0 0 0 0 4h2"></path>
+            <path d="M18 5h2a2 2 0 0 1 0 4h-2"></path>
+            <path d="M12 11v4"></path>
+            <path d="M9 21h6"></path>
+            <path d="M10 15h4v6h-4z"></path>
+          </svg>
+        </ng-container>
+      </span>
+      <span class="menu-label">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <footer class="sidebar-foot">
+    <button type="button" class="sidebar-profile">
+      <span class="profile-avatar">{{ userInitials }}</span>
+      <span class="profile-meta">
+        <strong>{{ userName }}</strong>
+        <small>{{ userEmail || userRole }}</small>
+      </span>
+    </button>
+  </footer>
+</ng-template>

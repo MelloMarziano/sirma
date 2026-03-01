@@ -1,0 +1,60 @@
+<div class="container-login">
+  <div class="card p-4 border-0">
+    <div class="text-center mb-4">
+      <img
+        src="assets/logo.png"
+        alt="Logo"
+        style="height: 120px; width: auto; object-fit: contain"
+      />
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <input
+          type="email"
+          class="form-control"
+          formControlName="username"
+          placeholder="Correo electrónico"
+        />
+      </div>
+
+      <div class="mb-4 position-relative">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          class="form-control"
+          formControlName="password"
+          placeholder="Contraseña"
+        />
+        <span
+          type="button"
+          (click)="togglePassword()"
+          class="position-absolute top-50 end-0 translate-middle-y me-3"
+          style="cursor: pointer; color: #6c757d; z-index: 10"
+        >
+          <i
+            class="bi"
+            [ngClass]="showPassword ? 'bi-eye' : 'bi-eye-slash'"
+          ></i>
+        </span>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100 py-2 mb-2"
+        [disabled]="loginForm.invalid || isLoading"
+      >
+        {{ isLoading ? 'Ingresando...' : 'Iniciar Sesión' }}
+      </button>
+    </form>
+  </div>
+
+  <div class="login-footer text-center mt-4">
+    <p class="mb-1 company-name">
+      Sistema propiedad de <strong>Rooksys</strong>
+    </p>
+    <small class="copyright"
+      >© {{ currentYear }} Todos los derechos reservados. Prohibida su copia o
+      distribución no autorizada.</small
+    >
+  </div>
+</div>

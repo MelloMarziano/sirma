@@ -1,0 +1,174 @@
+<section class="courses-view">
+  <header class="instructors-toolbar">
+    <label class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.2-3.2"></path>
+      </svg>
+      <input type="search" [(ngModel)]="searchTerm" placeholder="Buscar usuario por nombre, correo o rol..." />
+    </label>
+
+    <button type="button" class="btn-register" (click)="openCreateModal()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 5v14"></path>
+        <path d="M5 12h14"></path>
+      </svg>
+      Crear Usuario
+    </button>
+  </header>
+
+  <div class="row g-3" *ngIf="!loadingUsers; else usersLoading">
+    <div class="col-12 col-md-6 col-xl-4" *ngFor="let user of filteredUsers; trackBy: trackByUser">
+      <article class="course-card user-card" role="button" tabindex="0" (click)="openDetails(user)">
+        <div class="course-card-head">
+          <span class="course-book-icon user-avatar-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="3.25"></circle>
+              <path d="M5 19.4a7 7 0 0 1 14 0"></path>
+            </svg>
+          </span>
+          <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+            <span class="course-category-chip user-role-chip">{{ user.role }}</span>
+            <span class="user-status-pill" [class.inactive]="!user.isActive">
+              {{ user.isActive ? 'ACTIVO' : 'INACTIVO' }}
+            </span>
+          </div>
+        </div>
+
+        <h3>{{ user.fullName }}</h3>
+        <p class="user-email">{{ user.email }}</p>
+        <p class="user-provider">Acceso: Correo y contrasena (Firebase Auth)</p>
+
+        <footer class="course-card-foot">
+          <span class="course-id">UID: {{ getDisplayId(user.uid) }}</span>
+          <a href="#" (click)="openDetails(user, $event)">
+            Ver detalles
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7"></path>
+              <path d="M15 3h6v6"></path>
+              <path d="M10 14 21 3"></path>
+            </svg>
+          </a>
+        </footer>
+      </article>
+    </div>
+
+    <div class="col-12" *ngIf="filteredUsers.length === 0">
+      <article class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay usuarios para mostrar.</strong>
+          <p class="mb-0">Crea usuarios con correo y contrasena para administrar accesos.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #usersLoading>
+  <article class="course-empty">
+    <div class="course-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+        <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+        <path d="M12 13v7"></path>
+      </svg>
+    </div>
+    <div class="course-empty__content">
+      <strong>Cargando usuarios...</strong>
+      <p class="mb-0">Consultando perfiles en Firebase.</p>
+    </div>
+  </article>
+</ng-template>
+
+<div class="course-create-overlay" *ngIf="isCreateModalOpen" (click)="onCreateBackdropClick($event)">
+  <section class="course-modal" role="dialog" aria-modal="true" aria-labelledby="createUserTitle">
+    <header>
+      <h2 id="createUserTitle">{{ createModalTitle }}</h2>
+    </header>
+
+    <form [formGroup]="createForm" (ngSubmit)="onCreateSubmit()">
+      <div class="form-block">
+        <label for="userFullName">Nombre completo</label>
+        <input id="userFullName" type="text" formControlName="fullName" />
+      </div>
+
+      <div class="form-block">
+        <label for="userEmail">Correo</label>
+        <input id="userEmail" type="email" formControlName="email" [readonly]="isEditing" />
+      </div>
+
+      <div class="form-block" *ngIf="!isEditing">
+        <label for="userPassword">Contrasena</label>
+        <input
+          id="userPassword"
+          type="password"
+          formControlName="password"
+          placeholder="Minimo 6 caracteres"
+        />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="userRole">Rol</label>
+          <select id="userRole" formControlName="role">
+            <option *ngFor="let role of roleOptions" [value]="role">{{ role }}</option>
+          </select>
+        </div>
+
+        <div class="form-block">
+          <label for="userStatus">Estado</label>
+          <select id="userStatus" formControlName="isActive">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+        <button type="submit" class="btn-save" [disabled]="createForm.invalid || savingUser">
+          {{ createSubmitLabel }}
+        </button>
+      </div>
+
+      <p class="specialties-helper text-danger mt-2 mb-0" *ngIf="formError">{{ formError }}</p>
+    </form>
+  </section>
+</div>
+
+<div class="course-detail-overlay" *ngIf="selectedUser as user" (click)="onDetailsBackdropClick($event)">
+  <section class="course-modal" role="dialog" aria-modal="true" aria-labelledby="detailUserTitle">
+    <header class="d-flex justify-content-between align-items-center">
+      <h2 id="detailUserTitle">{{ user.fullName }}</h2>
+      <button type="button" class="detail-close-btn" (click)="closeDetails()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="p-3 p-md-4">
+      <div class="user-detail-grid">
+        <p class="mb-2"><strong>Correo:</strong> {{ user.email }}</p>
+        <p class="mb-2"><strong>Rol:</strong> {{ user.role }}</p>
+        <p class="mb-2"><strong>Estado:</strong> {{ user.isActive ? 'Activo' : 'Inactivo' }}</p>
+        <p class="mb-2"><strong>UID:</strong> {{ user.uid }}</p>
+        <p class="mb-0"><strong>Proveedor:</strong> {{ user.providerId }}</p>
+      </div>
+
+      <div class="course-detail-actions mt-3">
+        <button type="button" class="btn-edit-course" (click)="requestEditUser(user)">Editar</button>
+        <button type="button" class="btn-delete-course" (click)="deleteUser(user)">Eliminar</button>
+      </div>
+    </div>
+  </section>
+</div>

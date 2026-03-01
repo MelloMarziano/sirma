@@ -6,7 +6,13 @@
     "types": []
   },
   "files": [
-    "src/main.ts"
+    "src/main.ts",
+    "src/app/features/private/pages/dashboard/dashboard.module.ts",
+    "src/app/features/private/pages/instructores/instructores.module.ts",
+    "src/app/features/private/pages/dumc/dumc.module.ts",
+    "src/app/features/private/pages/cursos/cursos.module.ts",
+    "src/app/features/private/pages/usuarios/usuarios.module.ts",
+    "src/app/features/private/pages/logros/logros.module.ts"
   ],
   "include": [
     "src/**/*.d.ts"

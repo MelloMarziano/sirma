@@ -1,0 +1,406 @@
+<section class="instructors-view">
+  <header class="instructors-toolbar">
+    <label class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.2-3.2"></path>
+      </svg>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar registro DUMC por nombre o club..."
+        aria-label="Buscar registro DUMC"
+      />
+    </label>
+
+    <div class="toolbar-actions">
+      <div class="records-counter" [class.is-loading]="loadingRecords">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="M8 10h8"></path>
+          <path d="M8 14h5"></path>
+        </svg>
+        <span>
+          Mostrando <strong>{{ filteredInstructors.length }}</strong>
+          de {{ instructors.length }}
+        </span>
+      </div>
+
+      <button type="button" class="btn-register" (click)="openRegisterModal()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="10" cy="8" r="3"></circle>
+          <path d="M4.2 19.5a6.2 6.2 0 0 1 11.6 0"></path>
+          <path d="M19 8v6"></path>
+          <path d="M16 11h6"></path>
+        </svg>
+        Registrar DUMC
+      </button>
+    </div>
+  </header>
+
+  <section class="instructors-filters instructors-filters--compact">
+    <label class="filter-box">
+      <span>Ordenar por</span>
+      <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar registros DUMC">
+        <option value="RANK">Rango</option>
+        <option value="ZONE">Zona</option>
+      </select>
+    </label>
+  </section>
+
+  <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
+    <button
+      type="button"
+      class="rank-chip rank-chip--neutral rank-filter-chip"
+      [class.is-active]="selectedRankFilter === 'ALL'"
+      (click)="selectedRankFilter = 'ALL'"
+    >
+      Todos
+    </button>
+    <button
+      type="button"
+      class="rank-chip rank-filter-chip"
+      *ngFor="let rank of rankFilterOptions"
+      [ngClass]="getRankChipClass(rank)"
+      [class.is-active]="selectedRankFilter === rank"
+      (click)="selectedRankFilter = rank"
+    >
+      {{ rank }}
+    </button>
+  </section>
+
+  <div class="row g-2" *ngIf="!loadingRecords; else dumcLoading">
+    <div
+      class="col-12 col-md-6 col-xl-4 col-xxl-3"
+      *ngFor="let instructor of filteredInstructors; trackBy: trackByInstructor"
+    >
+      <article
+        class="instructor-card"
+        role="button"
+        tabindex="0"
+        (click)="openInstructorDetail(instructor)"
+        (keydown.enter)="openInstructorDetail(instructor)"
+        (keydown.space)="openInstructorDetail(instructor); $event.preventDefault()"
+      >
+        <div class="card-top">
+          <img
+            [src]="instructor.photoUrl"
+            [alt]="instructor.fullName"
+            class="avatar-photo"
+            loading="lazy"
+          />
+          <span class="rank-chip" [ngClass]="getRankChipClass(instructor.rank)">
+            {{ instructor.rank }}
+          </span>
+          <span class="status-chip" [class.inactive]="instructor.status === 'INACTIVO'">
+            {{ instructor.status }}
+          </span>
+        </div>
+
+        <h3>{{ instructor.fullName }}</h3>
+
+        <p class="detail-item mb-1">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 13c0 5-3.5 7.5-8 9c-4.5-1.5-8-4-8-9V6l8-3l8 3z"></path>
+          </svg>
+          {{ instructor.club }}
+        </p>
+
+        <p class="zone-chip mb-0">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 22s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10z"></path>
+            <circle cx="12" cy="12" r="2.5"></circle>
+          </svg>
+          {{ instructor.zone }}
+        </p>
+
+        <hr />
+
+        <p class="special-title mb-2">ESPECIALIDADES</p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="special-chip" *ngFor="let specialty of instructor.specialties">
+            {{ specialty }}
+          </span>
+        </div>
+      </article>
+    </div>
+
+    <div class="col-12" *ngIf="filteredInstructors.length === 0">
+      <article class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay registros DUMC.</strong>
+          <p class="mb-0">Usa el boton "Registrar DUMC" para crear el primero.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #dumcLoading>
+  <article class="course-empty">
+    <div class="course-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+        <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+        <path d="M12 13v7"></path>
+      </svg>
+    </div>
+    <div class="course-empty__content">
+      <strong>Cargando registros DUMC...</strong>
+      <p class="mb-0">Consultando informacion en Firebase.</p>
+    </div>
+  </article>
+</ng-template>
+
+<div
+  class="detail-modal-overlay"
+  *ngIf="selectedInstructor as instructor"
+  (click)="onDetailBackdropClick($event)"
+>
+  <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <header class="detail-head">
+      <div class="detail-user">
+        <img [src]="instructor.photoUrl" [alt]="instructor.fullName" />
+        <div>
+          <h2 id="detailTitle">{{ instructor.fullName }}</h2>
+          <p><span>{{ instructor.rank }}</span> • {{ instructor.club }}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="detail-close-btn"
+        aria-label="Cerrar detalle del registro DUMC"
+        (click)="closeInstructorDetail()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="detail-content">
+      <section class="detail-column">
+        <header>
+          <div class="title-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"></path>
+              <path d="M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7z"></path>
+            </svg>
+            <h3>Cursos Realizados</h3>
+          </div>
+          <button type="button" (click)="openAddCourseModal()">+ Agregar</button>
+        </header>
+
+        <article class="course-item" *ngFor="let course of instructor.completedCourses">
+          <strong>{{ course.name }}</strong>
+          <small>{{ course.category }}</small>
+        </article>
+      </section>
+
+      <section class="detail-column">
+        <header>
+          <div class="title-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m14 7 3 3-9 9H5v-3z"></path>
+              <path d="m12 5 2-2 5 5-2 2"></path>
+            </svg>
+            <h3>Historial Disciplinario</h3>
+          </div>
+          <button type="button">+ Reportar</button>
+        </header>
+
+        <article class="discipline-item">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          {{ instructor.disciplinaryStatus }}
+        </article>
+      </section>
+    </div>
+
+    <footer class="detail-foot">
+      <p>
+        Estado de autorización:
+        <strong [class.is-active]="instructor.status === 'ACTIVO'">
+          {{ instructor.status }}
+        </strong>
+      </p>
+      <div class="detail-actions-group">
+        <button type="button" class="btn-detail-edit" (click)="requestEditDumc(instructor)">
+          Editar
+        </button>
+        <button type="button" class="btn-detail-delete" (click)="deleteSelectedDumc(instructor)">
+          Eliminar
+        </button>
+        <button type="button" class="btn-revoke" (click)="toggleAuthorizationStatus(instructor)">
+          {{ instructor.status === 'ACTIVO' ? 'Revocar Permiso' : 'Activar Permiso' }}
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<div
+  class="dumc-add-course-overlay"
+  *ngIf="isAddCourseModalOpen && selectedInstructor as instructor"
+  (click)="onAddCourseBackdropClick($event)"
+>
+  <section class="course-modal" role="dialog" aria-modal="true" aria-labelledby="addCourseToDumcTitle">
+    <header class="d-flex justify-content-between align-items-center">
+      <h2 id="addCourseToDumcTitle">Agregar Curso a {{ instructor.fullName }}</h2>
+      <button type="button" class="detail-close-btn" (click)="closeAddCourseModal()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="p-3 p-md-4">
+      <div *ngIf="loadingCursos" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>Cargando cursos...</strong>
+          <p class="mb-0">Espera un momento.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingCursos && addableCoursesForSelectedInstructor.length === 0" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay cursos disponibles para agregar.</strong>
+          <p class="mb-0">Ya agregaste todos los cursos existentes a este registro.</p>
+        </div>
+      </div>
+
+      <div class="dumc-course-list" *ngIf="!loadingCursos && addableCoursesForSelectedInstructor.length > 0">
+        <button
+          type="button"
+          class="dumc-course-list-item"
+          *ngFor="let course of addableCoursesForSelectedInstructor; trackBy: trackByCourse"
+          (click)="addExistingCourseToSelected(course)"
+        >
+          <span>
+            <strong>{{ course.title }}</strong>
+            <small>{{ course.category }}</small>
+          </span>
+          <em>Agregar</em>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div
+  class="register-modal-overlay"
+  *ngIf="isRegisterModalOpen"
+  (click)="onModalBackdropClick($event)"
+>
+  <section class="register-modal" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+    <header>
+      <h2 id="registerTitle">{{ registerModalTitle }}</h2>
+    </header>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+      <div class="form-block">
+        <label for="fullName">Nombre Completo</label>
+        <input id="fullName" type="text" formControlName="fullName" />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="club">Club</label>
+          <input id="club" type="text" formControlName="club" />
+        </div>
+        <div class="form-block">
+          <label for="zone">Zona</label>
+          <select id="zone" formControlName="zone">
+            <option *ngFor="let zone of zoneOptions" [value]="zone">{{ zone }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label for="rank">Rango</label>
+        <select id="rank" formControlName="rank">
+          <option *ngFor="let rank of rankOptions" [value]="rank">{{ rank }}</option>
+        </select>
+      </div>
+
+      <div class="form-block">
+        <label>Especialidades (desde cursos creados)</label>
+
+        <div class="specialties-picker" *ngIf="!loadingCursos; else coursesForDumcLoading">
+          <label
+            class="specialty-option"
+            *ngFor="let course of availableCourses; trackBy: trackByCourse"
+          >
+            <input
+              type="checkbox"
+              [checked]="isSpecialtySelected(course.title)"
+              (change)="toggleSpecialty(course.title, $any($event.target).checked)"
+            />
+            <span>{{ course.title }}</span>
+            <small>{{ course.category }}</small>
+          </label>
+
+          <p class="specialties-helper mb-0" *ngIf="availableCourses.length === 0">
+            No hay cursos creados todavia. Crea cursos primero para usarlos como especialidades.
+          </p>
+        </div>
+
+        <ng-template #coursesForDumcLoading>
+          <p class="specialties-helper mb-0">Cargando cursos...</p>
+        </ng-template>
+      </div>
+
+      <div class="form-block">
+        <label for="photoFile">Foto (Opcional)</label>
+        <input id="photoFile" type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+        <small *ngIf="selectedPhotoName">{{ selectedPhotoName }}</small>
+        <div class="photo-preview-wrap" *ngIf="selectedPhotoPreview">
+          <img [src]="selectedPhotoPreview" alt="Vista previa foto DUMC" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeRegisterModal()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn-save"
+          [disabled]="registerForm.invalid || savingDumc || (!editingDumcId && availableCourses.length === 0)"
+        >
+          {{ registerSubmitLabel }}
+        </button>
+      </div>
+
+      <p class="specialties-helper text-danger mt-2 mb-0" *ngIf="uploadError">
+        {{ uploadError }}
+      </p>
+    </form>
+  </section>
+</div>

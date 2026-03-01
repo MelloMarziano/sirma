@@ -1,0 +1,179 @@
+<section class="courses-view">
+  <header class="instructors-toolbar">
+    <label class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m20 20-3.2-3.2"></path>
+      </svg>
+      <input type="search" [(ngModel)]="searchTerm" placeholder="Buscar logro..." />
+    </label>
+
+    <button type="button" class="btn-register" (click)="openCreateModal()">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 4v16"></path>
+        <path d="M4 12h16"></path>
+      </svg>
+      Crear Logro
+    </button>
+  </header>
+
+  <div class="row g-3" *ngIf="!loadingLogros; else logrosLoading">
+    <div class="col-12 col-md-6 col-xl-4" *ngFor="let logro of filteredLogros; trackBy: trackByLogro">
+      <article class="course-card logro-card">
+        <div class="course-card-head">
+          <span class="course-book-icon logro-icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3 8.8 8.2 3 9l4.2 4 1 5.8L12 16l3.8 2.8 1-5.8L21 9l-5.8-.8z"></path>
+            </svg>
+          </span>
+          <div class="d-flex gap-2 align-items-center flex-wrap justify-content-end">
+            <span class="course-category-chip">{{ logro.category }}</span>
+            <span class="logro-level-chip" [ngClass]="'is-' + getLevelClass(logro.level)">{{ logro.level }}</span>
+          </div>
+        </div>
+
+        <h3>{{ logro.title }}</h3>
+        <p>{{ logro.description }}</p>
+
+        <div class="d-flex align-items-center justify-content-between mt-3 gap-2">
+          <span class="logro-points">{{ logro.points }} pts</span>
+          <span class="user-status-pill" [class.inactive]="!logro.isActive">
+            {{ logro.isActive ? 'ACTIVO' : 'INACTIVO' }}
+          </span>
+        </div>
+
+        <footer class="course-card-foot">
+          <span class="course-id">LOGRO</span>
+          <a href="#" (click)="openDetails(logro, $event)">
+            Ver detalles
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7"></path>
+              <path d="M15 3h6v6"></path>
+              <path d="M10 14 21 3"></path>
+            </svg>
+          </a>
+        </footer>
+      </article>
+    </div>
+
+    <div class="col-12" *ngIf="filteredLogros.length === 0">
+      <article class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay logros para mostrar.</strong>
+          <p class="mb-0">Crea logros para luego asignarlos a instructores.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #logrosLoading>
+  <article class="course-empty">
+    <div class="course-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+        <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+        <path d="M12 13v7"></path>
+      </svg>
+    </div>
+    <div class="course-empty__content">
+      <strong>Cargando logros...</strong>
+      <p class="mb-0">Consultando informacion en Firebase.</p>
+    </div>
+  </article>
+</ng-template>
+
+<div class="course-create-overlay" *ngIf="isCreateModalOpen" (click)="onCreateBackdropClick($event)">
+  <section class="course-modal" role="dialog" aria-modal="true" aria-labelledby="createLogroTitle">
+    <header>
+      <h2 id="createLogroTitle">{{ createModalTitle }}</h2>
+    </header>
+
+    <form [formGroup]="createForm" (ngSubmit)="onCreateSubmit()">
+      <div class="form-block">
+        <label for="logroTitle">Nombre del logro</label>
+        <input id="logroTitle" type="text" formControlName="title" />
+      </div>
+
+      <div class="form-block">
+        <label for="logroDescription">Descripcion</label>
+        <input id="logroDescription" type="text" formControlName="description" />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="logroCategory">Categoria</label>
+          <select id="logroCategory" formControlName="category">
+            <option *ngFor="let option of categoryOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="form-block">
+          <label for="logroLevel">Nivel</label>
+          <select id="logroLevel" formControlName="level">
+            <option *ngFor="let option of levelOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="logroPoints">Puntos</label>
+          <input id="logroPoints" type="number" min="1" max="1000" formControlName="points" />
+        </div>
+        <div class="form-block">
+          <label for="logroStatus">Estado</label>
+          <select id="logroStatus" formControlName="isActive">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeCreateModal()">Cancelar</button>
+        <button type="submit" class="btn-save" [disabled]="createForm.invalid || savingLogro">
+          {{ createSubmitLabel }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<div class="course-detail-overlay" *ngIf="selectedLogro as logro" (click)="onDetailsBackdropClick($event)">
+  <section class="course-modal" role="dialog" aria-modal="true" aria-labelledby="detailLogroTitle">
+    <header class="d-flex justify-content-between align-items-center">
+      <h2 id="detailLogroTitle">{{ logro.title }}</h2>
+      <button type="button" class="detail-close-btn" (click)="closeDetails()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="p-3 p-md-4">
+      <p class="mb-2"><strong>Categoria:</strong> {{ logro.category }}</p>
+      <p class="mb-2"><strong>Nivel:</strong> {{ logro.level }}</p>
+      <p class="mb-2"><strong>Puntos:</strong> {{ logro.points }}</p>
+      <p class="mb-2"><strong>Estado:</strong> {{ logro.isActive ? 'Activo' : 'Inactivo' }}</p>
+      <p class="mb-0">{{ logro.description }}</p>
+
+      <div class="course-detail-actions mt-3">
+        <button type="button" class="btn-edit-course" (click)="closeDetails(); openEditModal(logro)">
+          Editar
+        </button>
+        <button type="button" class="btn-delete-course" (click)="requestDeleteLogro(logro)">
+          Eliminar
+        </button>
+      </div>
+    </div>
+  </section>
+</div>

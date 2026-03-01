@@ -1,0 +1,580 @@
+<section class="instructors-view">
+  <div class="instructors-sticky-tools">
+    <header class="instructors-toolbar">
+      <label class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.2-3.2"></path>
+        </svg>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar instructor por nombre, iglesia o correo..."
+          aria-label="Buscar instructor"
+        />
+      </label>
+
+      <div class="toolbar-actions">
+        <div class="records-counter" [class.is-loading]="loadingRecords">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="M8 10h8"></path>
+            <path d="M8 14h5"></path>
+          </svg>
+          <span>
+            Mostrando <strong>{{ filteredInstructors.length }}</strong>
+            de {{ instructors.length }}
+          </span>
+        </div>
+
+        <button type="button" class="btn-register" (click)="openRegisterModal()">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="10" cy="8" r="3"></circle>
+            <path d="M4.2 19.5a6.2 6.2 0 0 1 11.6 0"></path>
+            <path d="M19 8v6"></path>
+            <path d="M16 11h6"></path>
+          </svg>
+          Registrar Instructor
+        </button>
+      </div>
+    </header>
+
+    <section class="instructors-filters">
+      <label class="filter-box">
+        <span>Zona</span>
+        <select [(ngModel)]="selectedZoneFilter" aria-label="Filtrar por zona">
+          <option value="ALL">Todas</option>
+          <option *ngFor="let zone of zoneFilterOptions" [value]="zone">{{ zone }}</option>
+        </select>
+      </label>
+
+      <label class="filter-box">
+        <span>Rango</span>
+        <select [(ngModel)]="selectedRankFilter" aria-label="Filtrar por rango">
+          <option value="ALL">Todos</option>
+          <option *ngFor="let rank of rankFilterOptions" [value]="rank">{{ rank }}</option>
+        </select>
+      </label>
+
+      <label class="filter-box">
+        <span>Estado</span>
+        <select [(ngModel)]="selectedStatusFilter" aria-label="Filtrar por estado">
+          <option value="ALL">Todos</option>
+          <option *ngFor="let status of statusFilterOptions" [value]="status">{{ status }}</option>
+        </select>
+      </label>
+
+      <label class="filter-box">
+        <span>Ordenar por</span>
+        <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar instructores">
+          <option value="RANK">Rango</option>
+          <option value="ZONE">Zona</option>
+        </select>
+      </label>
+
+      <button type="button" class="btn-filter-clear" (click)="clearFilters()">Limpiar</button>
+    </section>
+
+    <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
+      <button
+        type="button"
+        class="rank-chip rank-chip--neutral rank-filter-chip"
+        [class.is-active]="selectedRankFilter === 'ALL'"
+        (click)="selectedRankFilter = 'ALL'"
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        class="rank-chip rank-filter-chip"
+        *ngFor="let rank of rankFilterOptions"
+        [ngClass]="getRankChipClass(rank)"
+        [class.is-active]="selectedRankFilter === rank"
+        (click)="selectedRankFilter = rank"
+      >
+        {{ rank }}
+      </button>
+    </section>
+  </div>
+
+  <div class="row g-2" *ngIf="!loadingRecords; else instructoresLoading">
+    <div
+      class="col-12 col-md-6 col-xl-4 col-xxl-3"
+      *ngFor="let instructor of filteredInstructors; trackBy: trackByInstructor"
+    >
+      <article
+        class="instructor-card compact-primary-card"
+        role="button"
+        tabindex="0"
+        (click)="openInstructorDetail(instructor)"
+        (keydown.enter)="openInstructorDetail(instructor)"
+        (keydown.space)="openInstructorDetail(instructor); $event.preventDefault()"
+      >
+        <div class="compact-card-head">
+          <img
+            [src]="instructor.photoUrl"
+            [alt]="instructor.fullName"
+            class="avatar-photo"
+            loading="lazy"
+          />
+          <div class="compact-card-main">
+            <h3>{{ instructor.fullName }}</h3>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="rank-chip" [ngClass]="getRankChipClass(instructor.rank)">
+                {{ instructor.rank }}
+              </span>
+              <span class="status-chip status-chip-inline" [class.inactive]="instructor.status === 'INACTIVO'">
+                {{ instructor.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p class="detail-item mb-1 mt-2">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M20 13c0 5-3.5 7.5-8 9c-4.5-1.5-8-4-8-9V6l8-3l8 3z"></path>
+          </svg>
+          {{ instructor.iglesia || instructor.club }}
+        </p>
+
+        <p class="detail-item mb-1">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <path d="m3 7 9 6 9-6"></path>
+          </svg>
+          {{ instructor.email || 'Sin correo' }}
+        </p>
+
+        <p class="detail-item mb-1">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 11.2 19a19.3 19.3 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.7.6 2.5a2 2 0 0 1-.45 2.1L8 9.8a16 16 0 0 0 6.2 6.2l1.5-1.1a2 2 0 0 1 2.1-.45c.8.3 1.6.5 2.5.6A2 2 0 0 1 22 16.9z"></path>
+          </svg>
+          {{ instructor.phone || 'Sin teléfono' }}
+        </p>
+
+        <p class="zone-chip mb-0">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 22s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10z"></path>
+            <circle cx="12" cy="12" r="2.5"></circle>
+          </svg>
+          {{ instructor.zone }}
+        </p>
+      </article>
+    </div>
+
+    <div class="col-12" *ngIf="filteredInstructors.length === 0">
+      <article class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay instructores.</strong>
+          <p class="mb-0">Usa el boton "Registrar Instructor" para crear el primero.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #instructoresLoading>
+  <article class="course-empty">
+    <div class="course-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+        <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+        <path d="M12 13v7"></path>
+      </svg>
+    </div>
+    <div class="course-empty__content">
+      <strong>Cargando instructores...</strong>
+      <p class="mb-0">Consultando informacion en Firebase.</p>
+    </div>
+  </article>
+</ng-template>
+
+<div
+  class="detail-modal-overlay"
+  *ngIf="selectedInstructor as instructor"
+  (click)="onDetailBackdropClick($event)"
+>
+  <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <header class="detail-head">
+      <div class="detail-user">
+        <img [src]="instructor.photoUrl" [alt]="instructor.fullName" />
+        <div>
+          <h2 id="detailTitle">{{ instructor.fullName }}</h2>
+          <p><span>{{ instructor.rank }}</span> • {{ instructor.iglesia || instructor.club }}</p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="detail-close-btn"
+        aria-label="Cerrar detalle del instructor"
+        (click)="closeInstructorDetail()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="detail-content">
+      <section class="detail-column">
+        <header>
+          <div class="title-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 12l2 2 4-4"></path>
+              <path d="M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7z"></path>
+            </svg>
+            <h3>Cursos Realizados</h3>
+          </div>
+          <button type="button" (click)="openAddCourseModal()">+ Agregar</button>
+        </header>
+
+        <article class="course-item" *ngFor="let course of instructor.completedCourses">
+          <strong>{{ course.name }}</strong>
+          <small>{{ course.category }}</small>
+        </article>
+      </section>
+
+      <section class="detail-column">
+        <header>
+          <div class="title-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="m14 7 3 3-9 9H5v-3z"></path>
+              <path d="m12 5 2-2 5 5-2 2"></path>
+            </svg>
+            <h3>Historial Disciplinario</h3>
+          </div>
+          <button type="button">+ Reportar</button>
+        </header>
+
+        <article class="discipline-item">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m9 12 2 2 4-4"></path>
+          </svg>
+          {{ instructor.disciplinaryStatus }}
+        </article>
+
+        <div class="mt-3">
+          <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+            <p class="special-title mb-0">LOGROS ASIGNADOS</p>
+            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" (click)="openAddAchievementModal()">
+              + Agregar
+            </button>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2" *ngIf="(instructor.achievements?.length ?? 0) > 0; else noAchievements">
+            <span class="special-chip" *ngFor="let logro of instructor.achievements">
+              {{ logro.title }} ({{ logro.points }} pts)
+            </span>
+          </div>
+
+          <ng-template #noAchievements>
+            <p class="specialties-helper mb-0">Sin logros asignados.</p>
+          </ng-template>
+        </div>
+      </section>
+    </div>
+
+    <footer class="detail-foot">
+      <p>
+        Estado de autorización:
+        <strong [class.is-active]="instructor.status === 'ACTIVO'">
+          {{ instructor.status }}
+        </strong>
+      </p>
+      <div class="detail-actions-group">
+        <button type="button" class="btn-detail-edit" (click)="requestEditInstructor(instructor)">
+          Editar
+        </button>
+        <button
+          type="button"
+          class="btn-detail-delete"
+          (click)="deleteSelectedInstructor(instructor)"
+        >
+          Eliminar
+        </button>
+        <button type="button" class="btn-revoke" (click)="toggleAuthorizationStatus(instructor)">
+          {{ instructor.status === 'ACTIVO' ? 'Revocar Permiso' : 'Activar Permiso' }}
+        </button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<div
+  class="dumc-add-course-overlay"
+  *ngIf="isAddCourseModalOpen && selectedInstructor as instructor"
+  (click)="onAddCourseBackdropClick($event)"
+>
+  <section
+    class="course-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addCourseToInstructorTitle"
+  >
+    <header class="d-flex justify-content-between align-items-center">
+      <h2 id="addCourseToInstructorTitle">Agregar Curso a {{ instructor.fullName }}</h2>
+      <button type="button" class="detail-close-btn" (click)="closeAddCourseModal()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="p-3 p-md-4">
+      <div *ngIf="loadingCursos" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>Cargando cursos...</strong>
+          <p class="mb-0">Espera un momento.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingCursos && addableCoursesForSelectedInstructor.length === 0" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay cursos disponibles para agregar.</strong>
+          <p class="mb-0">Ya agregaste todos los cursos existentes a este instructor.</p>
+        </div>
+      </div>
+
+      <div class="dumc-course-list" *ngIf="!loadingCursos && addableCoursesForSelectedInstructor.length > 0">
+        <button
+          type="button"
+          class="dumc-course-list-item"
+          *ngFor="let course of addableCoursesForSelectedInstructor; trackBy: trackByCourse"
+          (click)="addExistingCourseToSelected(course)"
+        >
+          <span>
+            <strong>{{ course.title }}</strong>
+            <small>{{ course.category }}</small>
+          </span>
+          <em>Agregar</em>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div
+  class="dumc-add-course-overlay"
+  *ngIf="isAddAchievementModalOpen && selectedInstructor as instructor"
+  (click)="onAddAchievementBackdropClick($event)"
+>
+  <section
+    class="course-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addAchievementToInstructorTitle"
+  >
+    <header class="d-flex justify-content-between align-items-center">
+      <h2 id="addAchievementToInstructorTitle">Agregar Logro a {{ instructor.fullName }}</h2>
+      <button type="button" class="detail-close-btn" (click)="closeAddAchievementModal()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="m9 9 6 6"></path>
+          <path d="m15 9-6 6"></path>
+        </svg>
+      </button>
+    </header>
+
+    <div class="p-3 p-md-4">
+      <div *ngIf="loadingLogros" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>Cargando logros...</strong>
+          <p class="mb-0">Espera un momento.</p>
+        </div>
+      </div>
+
+      <div *ngIf="!loadingLogros && addableLogrosForSelectedInstructor.length === 0" class="course-empty">
+        <div class="course-empty__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+            <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+            <path d="M12 13v7"></path>
+          </svg>
+        </div>
+        <div class="course-empty__content">
+          <strong>No hay logros disponibles para agregar.</strong>
+          <p class="mb-0">Ya agregaste todos los logros activos a este instructor.</p>
+        </div>
+      </div>
+
+      <div class="dumc-course-list" *ngIf="!loadingLogros && addableLogrosForSelectedInstructor.length > 0">
+        <button
+          type="button"
+          class="dumc-course-list-item"
+          *ngFor="let logro of addableLogrosForSelectedInstructor; trackBy: trackByLogro"
+          (click)="addExistingLogroToSelected(logro)"
+        >
+          <span>
+            <strong>{{ logro.title }}</strong>
+            <small>{{ logro.level }} • {{ logro.points }} pts</small>
+          </span>
+          <em>Agregar</em>
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div
+  class="register-modal-overlay"
+  *ngIf="isRegisterModalOpen"
+  (click)="onModalBackdropClick($event)"
+>
+  <section class="register-modal" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+    <header>
+      <h2 id="registerTitle">{{ registerModalTitle }}</h2>
+    </header>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+      <div class="form-block">
+        <label for="fullName">Nombre Completo</label>
+        <input id="fullName" type="text" formControlName="fullName" />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" formControlName="email" />
+        </div>
+        <div class="form-block">
+          <label for="phone">Número de teléfono</label>
+          <input id="phone" type="tel" formControlName="phone" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-block">
+          <label for="church">Iglesia</label>
+          <input id="church" type="text" formControlName="church" />
+        </div>
+        <div class="form-block">
+          <label for="zone">Zona</label>
+          <select id="zone" formControlName="zone">
+            <option *ngFor="let zone of zoneOptions" [value]="zone">{{ zone }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-block">
+        <label for="rank">Rango</label>
+        <select id="rank" formControlName="rank">
+          <option *ngFor="let rank of rankOptions" [value]="rank">{{ rank }}</option>
+        </select>
+      </div>
+
+      <div class="form-block">
+        <label>Especialidades (desde cursos creados)</label>
+
+        <div class="specialties-picker" *ngIf="!loadingCursos; else coursesForInstructoresLoading">
+          <label
+            class="specialty-option"
+            *ngFor="let course of availableCourses; trackBy: trackByCourse"
+          >
+            <input
+              type="checkbox"
+              [checked]="isSpecialtySelected(course.title)"
+              (change)="toggleSpecialty(course.title, $any($event.target).checked)"
+            />
+            <span>{{ course.title }}</span>
+            <small>{{ course.category }}</small>
+          </label>
+
+          <p class="specialties-helper mb-0" *ngIf="availableCourses.length === 0">
+            No hay cursos creados todavia. Crea cursos primero para usarlos como especialidades.
+          </p>
+        </div>
+
+        <ng-template #coursesForInstructoresLoading>
+          <p class="specialties-helper mb-0">Cargando cursos...</p>
+        </ng-template>
+      </div>
+
+      <div class="form-block">
+        <label>Logros (Opcional)</label>
+
+        <div class="specialties-picker" *ngIf="!loadingLogros; else logrosForInstructoresLoading">
+          <label
+            class="specialty-option"
+            *ngFor="let logro of availableLogros; trackBy: trackByLogro"
+          >
+            <input
+              type="checkbox"
+              [checked]="isAchievementSelected(logro.id)"
+              (change)="toggleAchievement(logro.id, $any($event.target).checked)"
+            />
+            <span>{{ logro.title }}</span>
+            <small>{{ logro.level }} • {{ logro.points }} pts</small>
+          </label>
+
+          <p class="specialties-helper mb-0" *ngIf="availableLogros.length === 0">
+            No hay logros creados todavia. Crea logros primero para asignarlos.
+          </p>
+        </div>
+
+        <ng-template #logrosForInstructoresLoading>
+          <p class="specialties-helper mb-0">Cargando logros...</p>
+        </ng-template>
+      </div>
+
+      <div class="form-block">
+        <label for="photoFile">Foto (Opcional)</label>
+        <input id="photoFile" type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+        <small *ngIf="selectedPhotoName">{{ selectedPhotoName }}</small>
+        <div class="photo-preview-wrap" *ngIf="selectedPhotoPreview">
+          <img [src]="selectedPhotoPreview" alt="Vista previa foto instructor" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" (click)="closeRegisterModal()">Cancelar</button>
+        <button
+          type="submit"
+          class="btn-save"
+          [disabled]="
+            registerForm.invalid || savingInstructor || (!editingInstructorId && availableCourses.length === 0)
+          "
+        >
+          {{ registerSubmitLabel }}
+        </button>
+      </div>
+
+      <p class="specialties-helper text-danger mt-2 mb-0" *ngIf="uploadError">
+        {{ uploadError }}
+      </p>
+    </form>
+  </section>
+</div>

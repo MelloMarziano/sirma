@@ -1,0 +1,233 @@
+<ng-container
+  *ngIf="currentSection === 'Instructores' || currentSection === 'DUMC'; else simpleView"
+>
+  <section class="instructors-view">
+    <header class="instructors-toolbar">
+      <label class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-3.2-3.2"></path>
+        </svg>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Buscar instructor por nombre o club..."
+          aria-label="Buscar instructor"
+        />
+      </label>
+
+      <button type="button" class="btn-register" (click)="openRegisterModal()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="10" cy="8" r="3"></circle>
+          <path d="M4.2 19.5a6.2 6.2 0 0 1 11.6 0"></path>
+          <path d="M19 8v6"></path>
+          <path d="M16 11h6"></path>
+        </svg>
+        Registrar Instructor
+      </button>
+    </header>
+
+    <div class="row g-3">
+      <div
+        class="col-12 col-md-6 col-xl-4"
+        *ngFor="let instructor of filteredInstructors; trackBy: trackByInstructor"
+      >
+        <article
+          class="instructor-card"
+          role="button"
+          tabindex="0"
+          (click)="openInstructorDetail(instructor)"
+          (keydown.enter)="openInstructorDetail(instructor)"
+          (keydown.space)="openInstructorDetail(instructor); $event.preventDefault()"
+        >
+          <div class="card-top">
+            <img
+              [src]="instructor.photoUrl"
+              [alt]="instructor.fullName"
+              class="avatar-photo"
+              loading="lazy"
+            />
+            <span class="rank-chip">{{ instructor.rank }}</span>
+            <span class="status-chip" [class.inactive]="instructor.status === 'INACTIVO'">
+              {{ instructor.status }}
+            </span>
+          </div>
+
+          <h3>{{ instructor.fullName }}</h3>
+
+          <p class="detail-item mb-1">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 13c0 5-3.5 7.5-8 9c-4.5-1.5-8-4-8-9V6l8-3l8 3z"></path>
+            </svg>
+            {{ instructor.club }}
+          </p>
+
+          <p class="zone-chip mb-0">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 22s7-4.35 7-10a7 7 0 1 0-14 0c0 5.65 7 10 7 10z"></path>
+              <circle cx="12" cy="12" r="2.5"></circle>
+            </svg>
+            {{ instructor.zone }}
+          </p>
+
+          <hr />
+
+          <p class="special-title mb-2">ESPECIALIDADES</p>
+          <div class="d-flex flex-wrap gap-2">
+            <span class="special-chip" *ngFor="let specialty of instructor.specialties">
+              {{ specialty }}
+            </span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <div
+    class="detail-modal-overlay"
+    *ngIf="selectedInstructor as instructor"
+    (click)="onDetailBackdropClick($event)"
+  >
+    <section class="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <header class="detail-head">
+        <div class="detail-user">
+          <img [src]="instructor.photoUrl" [alt]="instructor.fullName" />
+          <div>
+            <h2 id="detailTitle">{{ instructor.fullName }}</h2>
+            <p><span>{{ instructor.rank }}</span> • {{ instructor.club }}</p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="detail-close-btn"
+          aria-label="Cerrar detalle del instructor"
+          (click)="closeInstructorDetail()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m9 9 6 6"></path>
+            <path d="m15 9-6 6"></path>
+          </svg>
+        </button>
+      </header>
+
+      <div class="detail-content">
+        <section class="detail-column">
+          <header>
+            <div class="title-wrap">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M9 12l2 2 4-4"></path>
+                <path d="M12 3l7 4v5c0 5-3.5 7.5-7 9-3.5-1.5-7-4-7-9V7z"></path>
+              </svg>
+              <h3>Cursos Realizados</h3>
+            </div>
+            <button type="button">+ Agregar</button>
+          </header>
+
+          <article class="course-item" *ngFor="let course of instructor.completedCourses">
+            <strong>{{ course.name }}</strong>
+            <small>{{ course.category }}</small>
+          </article>
+        </section>
+
+        <section class="detail-column">
+          <header>
+            <div class="title-wrap">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m14 7 3 3-9 9H5v-3z"></path>
+                <path d="m12 5 2-2 5 5-2 2"></path>
+              </svg>
+              <h3>Historial Disciplinario</h3>
+            </div>
+            <button type="button">+ Reportar</button>
+          </header>
+
+          <article class="discipline-item">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="m9 12 2 2 4-4"></path>
+            </svg>
+            {{ instructor.disciplinaryStatus }}
+          </article>
+        </section>
+      </div>
+
+      <footer class="detail-foot">
+        <p>
+          Estado de autorización:
+          <strong [class.is-active]="instructor.status === 'ACTIVO'">
+            {{ instructor.status }}
+          </strong>
+        </p>
+        <button type="button" class="btn-revoke">Revocar Permiso</button>
+      </footer>
+    </section>
+  </div>
+
+  <div
+    class="register-modal-overlay"
+    *ngIf="isRegisterModalOpen"
+    (click)="onModalBackdropClick($event)"
+  >
+    <section class="register-modal" role="dialog" aria-modal="true" aria-labelledby="registerTitle">
+      <header>
+        <h2 id="registerTitle">Registrar Instructor</h2>
+      </header>
+
+      <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()">
+        <div class="form-block">
+          <label for="fullName">Nombre Completo</label>
+          <input id="fullName" type="text" formControlName="fullName" />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-block">
+            <label for="club">Club</label>
+            <input id="club" type="text" formControlName="club" />
+          </div>
+          <div class="form-block">
+            <label for="zone">Zona</label>
+            <input id="zone" type="text" formControlName="zone" />
+          </div>
+        </div>
+
+        <div class="form-block">
+          <label for="rank">Rango</label>
+          <select id="rank" formControlName="rank">
+            <option *ngFor="let rank of rankOptions" [value]="rank">{{ rank }}</option>
+          </select>
+        </div>
+
+        <div class="form-block">
+          <label for="specialties">Especialidades (separadas por coma)</label>
+          <input id="specialties" type="text" formControlName="specialties" placeholder="Marchas Basicas, Campismo" />
+        </div>
+
+        <div class="form-block">
+          <label for="photoFile">Foto (Opcional)</label>
+          <input id="photoFile" type="file" accept="image/*" (change)="onPhotoSelected($event)" />
+          <small *ngIf="selectedPhotoName">{{ selectedPhotoName }}</small>
+          <div class="photo-preview-wrap" *ngIf="selectedPhotoPreview">
+            <img [src]="selectedPhotoPreview" alt="Vista previa foto instructor" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeRegisterModal()">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="registerForm.invalid">Guardar</button>
+        </div>
+      </form>
+    </section>
+  </div>
+</ng-container>
+
+<ng-template #simpleView>
+  <section class="home-card">
+    <h2 class="mb-2">{{ currentSection }}</h2>
+    <p class="mb-0">
+      Area de trabajo de <strong>{{ currentSection }}</strong>. Puedes comenzar a integrar tus
+      modulos y tablas en esta vista.
+    </p>
+  </section>
+</ng-template>

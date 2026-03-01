@@ -1,0 +1,220 @@
+<section class="dashboard-view" *ngIf="!loadingInstructores; else dashboardLoading">
+  <div class="row g-3 mb-1">
+    <div class="col-12 col-sm-6 col-xl-3">
+      <article class="dash-stat-card">
+        <span class="dash-stat-label">Instructores</span>
+        <strong>{{ totalInstructores }}</strong>
+        <small>Total registrados</small>
+      </article>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <article class="dash-stat-card is-success">
+        <span class="dash-stat-label">Activos</span>
+        <strong>{{ instructoresActivos }}</strong>
+        <small>{{ instructoresInactivos }} inactivos</small>
+      </article>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <article class="dash-stat-card">
+        <span class="dash-stat-label">Cobertura</span>
+        <strong>{{ zonasConCobertura }}/{{ totalZones }}</strong>
+        <small>Zonas con instructores</small>
+      </article>
+    </div>
+    <div class="col-12 col-sm-6 col-xl-3">
+      <article class="dash-stat-card">
+        <span class="dash-stat-label">Promedio cursos</span>
+        <strong>{{ promedioCursosPorInstructor | number: '1.0-1' }}</strong>
+        <small>Por instructor</small>
+      </article>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-xl-8">
+      <article class="dash-panel">
+        <header class="dash-panel-head">
+          <div>
+            <h2>Instructores por zona</h2>
+            <p>Distribucion actual de instructores registrados.</p>
+          </div>
+          <span class="dash-pill">{{ totalInstructores }} total</span>
+        </header>
+
+        <div class="zone-pie-layout" *ngIf="zoneStatsForPie.length > 0; else noZoneData">
+          <div class="zone-pie-wrap">
+            <div class="zone-pie-chart" [style.background]="zonePieBackground" aria-label="Grafico de pastel por zonas">
+              <div class="zone-pie-hole">
+                <strong>{{ totalInstructores }}</strong>
+                <small>Instructores</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="zone-pie-legend">
+            <div class="zone-pie-legend-row" *ngFor="let zone of zoneStats; trackBy: trackByZone">
+              <span class="zone-dot" [style.background]="zone.color"></span>
+              <span class="zone-name">{{ zone.label }}</span>
+              <span class="zone-count">{{ zone.count }}</span>
+              <span class="zone-percent">{{ zone.sharePercentage }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noZoneData>
+          <article class="course-empty">
+            <div class="course-empty__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+                <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+                <path d="M12 13v7"></path>
+              </svg>
+            </div>
+            <div class="course-empty__content">
+              <strong>No hay datos para el grafico.</strong>
+              <p class="mb-0">Registra instructores para visualizar la distribucion por zonas.</p>
+            </div>
+          </article>
+        </ng-template>
+      </article>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <article class="dash-panel">
+        <header class="dash-panel-head">
+          <div>
+            <h2>Top Instructores</h2>
+            <p>Ordenados por puntos acumulados de logros asignados.</p>
+          </div>
+        </header>
+
+        <div class="ranked-list" *ngIf="topRankedInstructors.length > 0; else noTopRanked">
+          <article class="ranked-item" *ngFor="let row of topRankedInstructors; let i = index; trackBy: trackByInstructor">
+            <span class="ranked-position">#{{ i + 1 }}</span>
+            <img [src]="row.item.photoUrl" [alt]="row.item.fullName" loading="lazy" />
+            <div class="ranked-meta">
+              <strong>{{ row.item.fullName }}</strong>
+              <small>{{ row.item.rank }} • {{ row.item.zone }}</small>
+            </div>
+            <span class="ranked-score">{{ row.score }} pts</span>
+          </article>
+        </div>
+
+        <ng-template #noTopRanked>
+          <article class="course-empty">
+            <div class="course-empty__content">
+              <strong>Sin ranking por ahora.</strong>
+              <p class="mb-0">Agrega instructores para calcular posiciones.</p>
+            </div>
+          </article>
+        </ng-template>
+      </article>
+    </div>
+
+    <div class="col-12 col-lg-6 col-xl-4">
+      <article class="dash-panel">
+        <header class="dash-panel-head compact">
+          <div>
+            <h2>Distribucion por rango</h2>
+            <p>Resumen de rangos actuales.</p>
+          </div>
+        </header>
+
+        <div class="mini-bars">
+          <div class="mini-bar-row" *ngFor="let item of rankDistribution">
+            <div class="mini-bar-label">{{ item.label }}</div>
+            <div class="mini-bar-track">
+              <div class="mini-bar-fill" [style.width.%]="item.percentage"></div>
+            </div>
+            <strong>{{ item.count }}</strong>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="col-12 col-lg-6 col-xl-4">
+      <article class="dash-panel">
+        <header class="dash-panel-head compact">
+          <div>
+            <h2>Clubs con mas instructores</h2>
+            <p>Top 5 por cantidad registrada.</p>
+          </div>
+        </header>
+
+        <div class="dash-simple-list" *ngIf="topClubs.length > 0; else noClubs">
+          <div class="dash-simple-row" *ngFor="let club of topClubs; trackBy: trackByClub">
+            <span>{{ club.club }}</span>
+            <strong>{{ club.count }}</strong>
+          </div>
+        </div>
+
+        <ng-template #noClubs>
+          <article class="course-empty">
+            <div class="course-empty__content">
+              <strong>Sin clubs registrados.</strong>
+              <p class="mb-0">Aun no hay instructores con club asignado.</p>
+            </div>
+          </article>
+        </ng-template>
+      </article>
+    </div>
+
+    <div class="col-12 col-xl-4">
+      <article class="dash-panel">
+        <header class="dash-panel-head compact">
+          <div>
+            <h2>Resumen del sistema</h2>
+            <p>Datos utiles del resto de modulos.</p>
+          </div>
+        </header>
+
+        <div class="dash-summary-grid">
+          <div class="dash-summary-box">
+            <span>Cursos</span>
+            <strong>{{ cursosCount }}</strong>
+          </div>
+          <div class="dash-summary-box">
+            <span>DUMC</span>
+            <strong>{{ dumcCount }}</strong>
+          </div>
+          <div class="dash-summary-box">
+            <span>Usuarios</span>
+            <strong>{{ usuariosCount }}</strong>
+          </div>
+          <div class="dash-summary-box">
+            <span>Logros</span>
+            <strong>{{ logrosCount }}</strong>
+          </div>
+        </div>
+
+        <div class="dash-recent mt-3" *ngIf="recentInstructors.length > 0">
+          <p class="dash-subtitle">Ultimos instructores</p>
+          <div class="dash-recent-row" *ngFor="let instructor of recentInstructors; trackBy: trackByRecent">
+            <img [src]="instructor.photoUrl" [alt]="instructor.fullName" loading="lazy" />
+            <div>
+              <strong>{{ instructor.fullName }}</strong>
+              <small>{{ instructor.club }} • {{ instructor.zone }}</small>
+            </div>
+            <em>{{ getRankShort(instructor.rank) }}</em>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<ng-template #dashboardLoading>
+  <article class="course-empty">
+    <div class="course-empty__icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 8.5 12 4l9 4.5-9 4.5L3 8.5Z"></path>
+        <path d="M3 8.5V16l9 4 9-4V8.5"></path>
+        <path d="M12 13v7"></path>
+      </svg>
+    </div>
+    <div class="course-empty__content">
+      <strong>Cargando dashboard...</strong>
+      <p class="mb-0">Preparando metricas de instructores.</p>
+    </div>
+  </article>
+</ng-template>
