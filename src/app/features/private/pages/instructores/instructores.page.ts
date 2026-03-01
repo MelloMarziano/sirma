@@ -68,7 +68,7 @@ export class InstructoresPage implements OnInit, OnDestroy {
     church: ['', Validators.required],
     zone: ['Zona 1', Validators.required],
     rank: ['Guia Mayor', Validators.required],
-    specialties: this.formBuilder.nonNullable.control<string[]>([], Validators.required),
+    specialties: this.formBuilder.nonNullable.control<string[]>([]),
     achievementIds: this.formBuilder.nonNullable.control<string[]>([]),
   });
 
@@ -384,6 +384,7 @@ export class InstructoresPage implements OnInit, OnDestroy {
   async onRegisterSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      this.alertService.error('Completa los campos obligatorios para guardar el instructor.');
       return;
     }
 

@@ -408,7 +408,7 @@
         <button
           type="submit"
           class="btn-save"
-          [disabled]="registerForm.invalid || savingDumc || (!editingDumcId && availableCourses.length === 0)"
+          [disabled]="savingDumc"
         >
           {{ registerSubmitLabel }}
         </button>

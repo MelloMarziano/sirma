@@ -52,7 +52,7 @@ export class DumcPage implements OnInit, OnDestroy {
     club: ['', Validators.required],
     zone: ['Zona 1', Validators.required],
     rank: ['Guia Mayor', Validators.required],
-    specialties: this.formBuilder.nonNullable.control<string[]>([], Validators.required),
+    specialties: this.formBuilder.nonNullable.control<string[]>([]),
   });
 
   constructor(
@@ -273,6 +273,7 @@ export class DumcPage implements OnInit, OnDestroy {
   async onRegisterSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      this.alertService.error('Completa los campos obligatorios para guardar el registro DUMC.');
       return;
     }
 

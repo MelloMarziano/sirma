@@ -580,9 +580,7 @@
         <button
           type="submit"
           class="btn-save"
-          [disabled]="
-            registerForm.invalid || savingInstructor || (!editingInstructorId && availableCourses.length === 0)
-          "
+          [disabled]="savingInstructor"
         >
           {{ registerSubmitLabel }}
         </button>
