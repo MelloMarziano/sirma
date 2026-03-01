@@ -27,6 +27,7 @@ export class InstructoresPage implements OnInit, OnDestroy {
   selectedRankFilter = 'ALL';
   selectedStatusFilter = 'ALL';
   selectedOrderBy: 'RANK' | 'ZONE' = 'RANK';
+  showMobileFilters = false;
   isRegisterModalOpen = false;
   isAddCourseModalOpen = false;
   isAddAchievementModalOpen = false;
@@ -504,6 +505,10 @@ export class InstructoresPage implements OnInit, OnDestroy {
     this.selectedRankFilter = 'ALL';
     this.selectedStatusFilter = 'ALL';
     this.selectedOrderBy = 'RANK';
+  }
+
+  toggleMobileFilters(): void {
+    this.showMobileFilters = !this.showMobileFilters;
   }
 
   getRankChipClass(rank: string | null | undefined): string {

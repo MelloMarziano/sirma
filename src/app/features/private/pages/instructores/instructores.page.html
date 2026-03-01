@@ -39,62 +39,78 @@
       </div>
     </header>
 
-    <section class="instructors-filters">
-      <label class="filter-box">
-        <span>Zona</span>
-        <select [(ngModel)]="selectedZoneFilter" aria-label="Filtrar por zona">
-          <option value="ALL">Todas</option>
-          <option *ngFor="let zone of zoneFilterOptions" [value]="zone">{{ zone }}</option>
-        </select>
-      </label>
+    <button
+      type="button"
+      class="btn-mobile-filters"
+      (click)="toggleMobileFilters()"
+      [attr.aria-expanded]="showMobileFilters"
+      aria-controls="instructoresMobileFilters"
+    >
+      {{ showMobileFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
+    </button>
 
-      <label class="filter-box">
-        <span>Rango</span>
-        <select [(ngModel)]="selectedRankFilter" aria-label="Filtrar por rango">
-          <option value="ALL">Todos</option>
-          <option *ngFor="let rank of rankFilterOptions" [value]="rank">{{ rank }}</option>
-        </select>
-      </label>
+    <div
+      id="instructoresMobileFilters"
+      class="mobile-filter-content"
+      [class.mobile-collapsed]="!showMobileFilters"
+    >
+      <section class="instructors-filters">
+        <label class="filter-box">
+          <span>Zona</span>
+          <select [(ngModel)]="selectedZoneFilter" aria-label="Filtrar por zona">
+            <option value="ALL">Todas</option>
+            <option *ngFor="let zone of zoneFilterOptions" [value]="zone">{{ zone }}</option>
+          </select>
+        </label>
 
-      <label class="filter-box">
-        <span>Estado</span>
-        <select [(ngModel)]="selectedStatusFilter" aria-label="Filtrar por estado">
-          <option value="ALL">Todos</option>
-          <option *ngFor="let status of statusFilterOptions" [value]="status">{{ status }}</option>
-        </select>
-      </label>
+        <label class="filter-box">
+          <span>Rango</span>
+          <select [(ngModel)]="selectedRankFilter" aria-label="Filtrar por rango">
+            <option value="ALL">Todos</option>
+            <option *ngFor="let rank of rankFilterOptions" [value]="rank">{{ rank }}</option>
+          </select>
+        </label>
 
-      <label class="filter-box">
-        <span>Ordenar por</span>
-        <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar instructores">
-          <option value="RANK">Rango</option>
-          <option value="ZONE">Zona</option>
-        </select>
-      </label>
+        <label class="filter-box">
+          <span>Estado</span>
+          <select [(ngModel)]="selectedStatusFilter" aria-label="Filtrar por estado">
+            <option value="ALL">Todos</option>
+            <option *ngFor="let status of statusFilterOptions" [value]="status">{{ status }}</option>
+          </select>
+        </label>
 
-      <button type="button" class="btn-filter-clear" (click)="clearFilters()">Limpiar</button>
-    </section>
+        <label class="filter-box">
+          <span>Ordenar por</span>
+          <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar instructores">
+            <option value="RANK">Rango</option>
+            <option value="ZONE">Zona</option>
+          </select>
+        </label>
 
-    <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
-      <button
-        type="button"
-        class="rank-chip rank-chip--neutral rank-filter-chip"
-        [class.is-active]="selectedRankFilter === 'ALL'"
-        (click)="selectedRankFilter = 'ALL'"
-      >
-        Todos
-      </button>
-      <button
-        type="button"
-        class="rank-chip rank-filter-chip"
-        *ngFor="let rank of rankFilterOptions"
-        [ngClass]="getRankChipClass(rank)"
-        [class.is-active]="selectedRankFilter === rank"
-        (click)="selectedRankFilter = rank"
-      >
-        {{ rank }}
-      </button>
-    </section>
+        <button type="button" class="btn-filter-clear" (click)="clearFilters()">Limpiar</button>
+      </section>
+
+      <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
+        <button
+          type="button"
+          class="rank-chip rank-chip--neutral rank-filter-chip"
+          [class.is-active]="selectedRankFilter === 'ALL'"
+          (click)="selectedRankFilter = 'ALL'"
+        >
+          Todos
+        </button>
+        <button
+          type="button"
+          class="rank-chip rank-filter-chip"
+          *ngFor="let rank of rankFilterOptions"
+          [ngClass]="getRankChipClass(rank)"
+          [class.is-active]="selectedRankFilter === rank"
+          (click)="selectedRankFilter = rank"
+        >
+          {{ rank }}
+        </button>
+      </section>
+    </div>
   </div>
 
   <div class="row g-2" *ngIf="!loadingRecords; else instructoresLoading">

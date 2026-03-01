@@ -38,36 +38,52 @@
     </div>
   </header>
 
-  <section class="instructors-filters instructors-filters--compact">
-    <label class="filter-box">
-      <span>Ordenar por</span>
-      <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar registros DUMC">
-        <option value="RANK">Rango</option>
-        <option value="ZONE">Zona</option>
-      </select>
-    </label>
-  </section>
+  <button
+    type="button"
+    class="btn-mobile-filters"
+    (click)="toggleMobileFilters()"
+    [attr.aria-expanded]="showMobileFilters"
+    aria-controls="dumcMobileFilters"
+  >
+    {{ showMobileFilters ? 'Ocultar filtros' : 'Mostrar filtros' }}
+  </button>
 
-  <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
-    <button
-      type="button"
-      class="rank-chip rank-chip--neutral rank-filter-chip"
-      [class.is-active]="selectedRankFilter === 'ALL'"
-      (click)="selectedRankFilter = 'ALL'"
-    >
-      Todos
-    </button>
-    <button
-      type="button"
-      class="rank-chip rank-filter-chip"
-      *ngFor="let rank of rankFilterOptions"
-      [ngClass]="getRankChipClass(rank)"
-      [class.is-active]="selectedRankFilter === rank"
-      (click)="selectedRankFilter = rank"
-    >
-      {{ rank }}
-    </button>
-  </section>
+  <div
+    id="dumcMobileFilters"
+    class="mobile-filter-content"
+    [class.mobile-collapsed]="!showMobileFilters"
+  >
+    <section class="instructors-filters instructors-filters--compact">
+      <label class="filter-box">
+        <span>Ordenar por</span>
+        <select [(ngModel)]="selectedOrderBy" aria-label="Ordenar registros DUMC">
+          <option value="RANK">Rango</option>
+          <option value="ZONE">Zona</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="rank-chip-filters" *ngIf="rankFilterOptions.length > 0">
+      <button
+        type="button"
+        class="rank-chip rank-chip--neutral rank-filter-chip"
+        [class.is-active]="selectedRankFilter === 'ALL'"
+        (click)="selectedRankFilter = 'ALL'"
+      >
+        Todos
+      </button>
+      <button
+        type="button"
+        class="rank-chip rank-filter-chip"
+        *ngFor="let rank of rankFilterOptions"
+        [ngClass]="getRankChipClass(rank)"
+        [class.is-active]="selectedRankFilter === rank"
+        (click)="selectedRankFilter = rank"
+      >
+        {{ rank }}
+      </button>
+    </section>
+  </div>
 
   <div class="row g-2" *ngIf="!loadingRecords; else dumcLoading">
     <div

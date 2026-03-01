@@ -132,6 +132,23 @@ textarea {
   margin-bottom: 0.45rem;
 }
 
+.btn-mobile-filters {
+  display: none;
+  width: 100%;
+  height: 34px;
+  border: 1px solid #c8d3e6;
+  border-radius: 10px;
+  background: #f3f7fc;
+  color: #2f4771;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 0.45rem;
+}
+
+.mobile-filter-content {
+  display: block;
+}
+
 .rank-chip-filters {
   display: flex;
   flex-wrap: wrap;
@@ -1736,6 +1753,16 @@ textarea {
 
   .instructors-filters--compact {
     grid-template-columns: 1fr;
+  }
+
+  .btn-mobile-filters {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-filter-content.mobile-collapsed {
+    display: none;
   }
 
   .btn-filter-clear {

@@ -19,6 +19,7 @@ export class DumcPage implements OnInit, OnDestroy {
   searchTerm = '';
   selectedRankFilter = 'ALL';
   selectedOrderBy: 'RANK' | 'ZONE' = 'RANK';
+  showMobileFilters = false;
   isRegisterModalOpen = false;
   isAddCourseModalOpen = false;
   loadingRecords = true;
@@ -361,6 +362,10 @@ export class DumcPage implements OnInit, OnDestroy {
 
   trackByCourse(index: number, course: CursoItem): string {
     return course.id ?? `${index}`;
+  }
+
+  toggleMobileFilters(): void {
+    this.showMobileFilters = !this.showMobileFilters;
   }
 
   getRankChipClass(rank: string | null | undefined): string {
